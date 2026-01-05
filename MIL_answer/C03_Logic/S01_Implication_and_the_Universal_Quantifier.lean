@@ -38,15 +38,24 @@ theorem my_lemma3 :
   intro x y ε epos ele1 xlt ylt
   sorry
 
+#check mul_le_mul
+#check abs_nonneg
+#check mul_lt_mul_right
+#check abs_mul
+#check le_of_lt
+#check LE.le.trans_lt
+#check LT.lt.trans_le
+
 theorem my_lemma4 :
     ∀ {x y ε : ℝ}, 0 < ε → ε ≤ 1 → |x| < ε → |y| < ε → |x * y| < ε := by
   intro x y ε epos ele1 xlt ylt
   calc
-    |x * y| = |x| * |y| := sorry
-    _ ≤ |x| * ε := sorry
-    _ < 1 * ε := sorry
-    _ = ε := sorry
-
+    |x * y| = |x| * |y| := abs_mul x y
+    _ ≤ |x| * ε := mul_le_mul (le_refl |x|) (le_of_lt ylt) (abs_nonneg y) (abs_nonneg
+    x)
+    _ < 1 * ε := (mul_lt_mul_right epos).mpr (lt_of_lt_of_le xlt ele1)
+    _ = ε := one_mul ε
+-- abs_mul, mul_le_mul, abs_nonneg, mul_lt_mul_right
 def FnUb (f : ℝ → ℝ) (a : ℝ) : Prop :=
   ∀ x, f x ≤ a
 
@@ -63,15 +72,33 @@ example (hfa : FnUb f a) (hgb : FnUb g b) : FnUb (fun x ↦ f x + g x) (a + b) :
   apply hfa
   apply hgb
 
-example (hfa : FnLb f a) (hgb : FnLb g b) : FnLb (fun x ↦ f x + g x) (a + b) :=
-  sorry
+example (hfa : FnLb f a) (hgb : FnLb g b) : FnLb (fun x ↦ f x + g x) (a + b) :=by
+  intro x
+  dsimp
+  apply add_le_add
+  apply hfa
+  apply hgb
 
-example (nnf : FnLb f 0) (nng : FnLb g 0) : FnLb (fun x ↦ f x * g x) 0 :=
-  sorry
+
+example (nnf : FnLb f 0) (nng : FnLb g 0) : FnLb (fun x ↦ f x * g x) 0 :=by
+  intro x
+  rw [← mul_zero 0]
+  apply mul_le_mul
+  apply nnf
+  apply nng
+  apply le_refl
+  apply nnf
+
 
 example (hfa : FnUb f a) (hgb : FnUb g b) (nng : FnLb g 0) (nna : 0 ≤ a) :
-    FnUb (fun x ↦ f x * g x) (a * b) :=
-  sorry
+    FnUb (fun x ↦ f x * g x) (a * b) :=by
+  intro x
+  dsimp
+  apply mul_le_mul
+  apply hfa
+  apply hgb
+  apply nng
+  apply nna
 
 end
 
