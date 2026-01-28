@@ -76,20 +76,23 @@ example {m n : ℕ} (coprime_mn : m.Coprime n) : m ^ 2 ≠ 2 * n ^ 2 := by
     exact this
   norm_num at this
 
-theorem prime_of_prime_sqr {p m : ℕ} (p_prime : Nat.Prime p) : p ∣ m ^ 2 → p ∣ m := by
-  apply prime_dvd
-
 example {m n p : ℕ} (coprime_mn : m.Coprime n) (prime_p : p.Prime) : m ^ 2 ≠ p * n ^ 2 := by
   intro sqr_eq
   have p_dvd_m: p ∣ m := by
-    sorry
+    apply Nat.Prime.dvd_of_dvd_pow prime_p
+    rw [sqr_eq]
+    apply dvd_mul_right
   obtain ⟨k, meq⟩ := dvd_iff_exists_eq_mul_left.mp p_dvd_m
   have : p * (p * k ^ 2) = p * n ^ 2 := by
-    sorry
+    rw [← sqr_eq,meq]
+    ring
   have : p * k ^ 2 = n ^ 2 := by
-    sorry
+    apply Nat.mul_left_cancel at this
+    exact this
+    apply Nat.Prime.pos prime_p
   have p_dvd_n : p ∣ n := by
-    sorry
+    apply dvd_of_mul_right_eq at this
+    apply Nat.Prime.dvd_of_dvd_pow prime_p this
   have : p ∣ m.gcd n := by
     apply dvd_gcd
     apply p_dvd_m
@@ -99,6 +102,7 @@ example {m n p : ℕ} (coprime_mn : m.Coprime n) (prime_p : p.Prime) : m ^ 2 ≠
     rw [coprime_mn] at this
     exact this
   norm_num at this
+  exact Nat.Prime.ne_one prime_p this
 
 #check Nat.primeFactorsList
 #check Nat.prime_of_mem_primeFactorsList
